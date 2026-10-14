@@ -1,15 +1,15 @@
-# MMM-Template
+# MMM-Lucidinator
 Use this template for creating new MagicMirror² modules.
 
-See the [wiki page](https://github.com/Dennis-Rosenbaum/MMM-Template/wiki) for an in depth overview of how to get started.
+See the [wiki page](https://github.com/Dennis-Rosenbaum/MMM-Lucidinator/wiki) for an in depth overview of how to get started.
 
-# MMM-Template
+# MMM-Lucidinator
 
-*MMM-Template* is a module for [MagicMirror²](https://github.com/MagicMirrorOrg/MagicMirror) that displays ... [Module description]
+*MMM-Lucidinator* is a module for [MagicMirror²](https://github.com/MagicMirrorOrg/MagicMirror) that displays ... [Module description]
 
 ## Screenshot
 
-![Example of MMM-Template](./example_1.png)
+![Example of MMM-Lucidinator](./example_1.png)
 
 ## Installation
 
@@ -27,7 +27,7 @@ git clone [GitHub url]
 Go to the module directory and pull the latest changes:
 
 ```bash
-cd ~/MagicMirror/modules/MMM-Template
+cd ~/MagicMirror/modules/MMM-Lucidinator
 git pull
 ```
 
@@ -41,7 +41,7 @@ Minimal configuration to use the module:
 
 ```js
     {
-        module: 'MMM-Template',
+        module: 'MMM-Lucidinator',
         position: 'lower_third'
     },
 ```
@@ -50,7 +50,7 @@ Configuration with all options:
 
 ```js
     {
-        module: 'MMM-Template',
+        module: 'MMM-Lucidinator',
         position: 'lower_third',
         config: {
             exampleContent: 'Welcome world'
