@@ -1,64 +1,96 @@
 Module.register("MMM-Lucidinator", {
-
   defaults: {
-    exampleContent: ""
+    updateInterval: 5 * 60 * 1000,
+    vehicleIndex: 0,
+    rangeUnit: "mi", // "mi" or "km"
+    showHealth: false,
+    title: "Lucid",
+    pythonExecutable: "python3",
+    scriptPath: "lucid_status.py"
   },
 
-  /**
-   * Apply the default styles.
-   */
-  getStyles() {
-    return ["lucidinator.css"]
-  },
-
-  /**
-   * Pseudo-constructor for our module. Initialize stuff here.
-   */
   start() {
-    this.lucidinatorContent = this.config.exampleContent
+    this.status = null;
+    this.error = null;
 
-    // set timeout for next random text
-    setInterval(() => this.addRandomText(), 3000)
+    this.sendSocketNotification("START", {
+      updateInterval: this.config.updateInterval,
+      vehicleIndex: this.config.vehicleIndex,
+      rangeUnit: this.config.rangeUnit,
+      pythonExecutable: this.config.pythonExecutable,
+      scriptPath: this.config.scriptPath
+    });
   },
 
-  /**
-   * Handle notifications received by the node helper.
-   * So we can communicate between the node helper and the module.
-   *
-   * @param {string} notification - The notification identifier.
-   * @param {any} payload - The payload data`returned by the node helper.
-   */
-  socketNotificationReceived: function (notification, payload) {
-    if (notification === "EXAMPLE_NOTIFICATION") {
-      this.lucidinatorContent = `${this.config.exampleContent} ${payload.text}`
-      this.updateDom()
-    }
+  getStyles() {
+    return ["MMM-Lucidinator.css"];
   },
 
-  /**
-   * Render the page we're on.
-   */
   getDom() {
-    const wrapper = document.createElement("div")
-    wrapper.innerHTML = `<b>Title</b><br />${this.lucidinatorContent}`
+    const wrapper = document.createElement("div");
+    wrapper.className = "lucidinator";
 
-    return wrapper
+    const title = document.createElement("div");
+    title.className = "lucidinator-title";
+    title.textContent = this.config.title;
+    wrapper.appendChild(title);
+
+    if (this.error) {
+      const error = document.createElement("div");
+      error.className = "lucidinator-error";
+      error.textContent = this.error;
+      wrapper.appendChild(error);
+      return wrapper;
+    }
+
+    if (!this.status) {
+      const loading = document.createElement("div");
+      loading.className = "dimmed";
+      loading.textContent = "Loading vehicle status…";
+      wrapper.appendChild(loading);
+      return wrapper;
+    }
+
+    const charge = document.createElement("div");
+    charge.className = "lucidinator-charge";
+    charge.textContent = `${this.formatNumber(this.status.chargePercent)}%`;
+    wrapper.appendChild(charge);
+
+    const range = document.createElement("div");
+    range.className = "lucidinator-range";
+    range.textContent = `${this.formatNumber(this.status.range)} ${this.status.rangeUnit} range`;
+    wrapper.appendChild(range);
+
+    if (this.config.showHealth && this.status.batteryHealth !== null) {
+      const health = document.createElement("div");
+      health.className = "lucidinator-health";
+      health.textContent = `Battery health: ${this.formatNumber(this.status.batteryHealth)}%`;
+      wrapper.appendChild(health);
+    }
+
+    if (this.status.updatedAt) {
+      const updated = document.createElement("div");
+      updated.className = "lucidinator-updated dimmed";
+      updated.textContent = `Updated ${new Date(this.status.updatedAt).toLocaleTimeString()}`;
+      wrapper.appendChild(updated);
+    }
+
+    return wrapper;
   },
 
-  addRandomText() {
-    this.sendSocketNotification("GET_RANDOM_TEXT", { amountCharacters: 15 })
+  formatNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.round(number * 10) / 10 : "—";
   },
 
-  /**
-   * This is the place to receive notifications from other modules or the system.
-   *
-   * @param {string} notification The notification ID, it is preferred that it prefixes your module name
-   * @param {number} payload the payload type.
-   */
-  notificationReceived(notification, payload) {
-    if (notification === "TEMPLATE_RANDOM_TEXT") {
-      this.lucidinatorContent = `${this.config.exampleContent} ${payload}`
-      this.updateDom()
+  socketNotificationReceived(notification, payload) {
+    if (notification === "LUCID_STATUS") {
+      this.status = payload;
+      this.error = null;
+      this.updateDom();
+    } else if (notification === "LUCID_ERROR") {
+      this.error = payload?.message || "Unable to update vehicle status";
+      this.updateDom();
     }
   }
-})
+});
