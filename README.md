@@ -11,6 +11,10 @@ Displayed information:
 - Battery health (optional)
 - Last update time
 
+## screenshot
+
+![Screenshot](Screenshot.png)
+
 
 Installation
 ============
